@@ -77,8 +77,8 @@ def validate_phone_number(phone, dialing_code):
     phone = phone.replace(" ", "").replace("-", "")
     
     # Check if the phone number starts with the correct dialing code
-    if not phone.startswith(dialing_code):
-        return False, f"Phone number must start with {dialing_code}."
+    # if not phone.startswith(dialing_code):
+    #     return False, f"Phone number must start with {dialing_code}."
     
     # Extract the number part (remove the dialing code)
     number_without_code = phone[len(dialing_code):]
@@ -257,7 +257,7 @@ elif st.session_state.step == 3:
 
     # Date of Birth
     # Calculate the maximum allowable date (9 years ago from today)
-    max_date = date.today().replace(year=date.today().year - 9)
+    max_date = date.today().replace(year=date.today().year - 14)
     
     st.session_state.dob = st.date_input(
         label="Date of Birth",  # Label for the field
