@@ -1,3 +1,4 @@
 .env
 ICAN_Form_Submission_*.docx
 __pycache__
+AspireCraft_Form_Submission_*.docx
