@@ -211,13 +211,12 @@ if st.session_state.step == 1:
 
     st.title("WELCOME TO ASPIRECRAFT!")
     st.write("""
-    At AspireCraft, we believe in unlocking potential and creating opportunities for lifelong learning.
-    Our international CPD and accredited qualifications are designed to empower you with the skills and knowledge needed to excel in your chosen field.
+        At AspireCraft, we believe in transforming aspirations into achievements. By joining us, you’re embarking on a journey that unlocks boundless opportunities for growth, success, and excellence. Whether it’s advancing your education, enhancing your skills, or navigating your career.
 
-    We are excited to have you on board and look forward to supporting your journey towards achieving UK accreditation.
+        AspireCraft is here to guide you every step of the way.
+        This form marks the beginning of your story—a story of potential, purpose, and progress. Together, let’s craft your success and empower your future.
 
-    Let's get started with your enrolment process. It's simple and straightforward. Please proceed by filling out the following fields one at a time.
-    Click 'Next' to begin your journey with AspireCraft!
+        Let’s get started!
     """)
     if st.button("Next"):
         st.session_state.step = 2
@@ -1016,6 +1015,9 @@ elif st.session_state.step == 11:
         st.session_state.preferred_start_date = "Select"  # Default to Select
     if 'consent' not in st.session_state:
         st.session_state.consent = False  # Default to unchecked
+    # Digital media release consent
+    if 'digital_media_consent' not in st.session_state:
+        st.session_state.digital_media_consent = True  # Default to unchecked        
 
     # Input fields with default values from session state
     # Dropdown for Preferred Start Date/Timeline
@@ -1054,15 +1056,25 @@ elif st.session_state.step == 11:
         "Please provide emergency contact details.", 
         value=st.session_state.emergency_contact
     )
+
+    # Link to the privacy policy
+    privacy_policy_doc_link = 'https://drive.google.com/file/d/1sgF6eHZ57idELDEkQD8ZQ7p8VPrmy3WC/view?ts=6789943b'
+    st.write(f"[Privacy Policy]({privacy_policy_doc_link})")  # Actual link to privacy policy
+    # Privacy policy consent
     st.session_state.consent = st.checkbox(
         "I consent to the collection and processing of my personal data according to AspireCraft’s privacy policy.", 
         value=st.session_state.consent
     )
-
-    # Link to the privacy policy
-    privacy_policy_doc_link = 'https://drive.google.com/file/d/1QnmwPyUv22LPOU3eKBT1ho55QW_5_olS/view'
-    st.write(f"[Privacy Policy]({privacy_policy_doc_link})")  # Actual link to privacy policy
-
+    
+    # Link to the Media Release Consent (M) document
+    media_consent_doc_link = 'https://drive.google.com/file/d/1SrHyvp_PHM7OhHyQvE-JJRPCUvloTV0z/view?ts=67899187'
+    st.write(f"[Media Release Consent (M) document]({media_consent_doc_link})")  # Actual link to Media Release Consent (M) document
+    # Digital media release consent
+    st.session_state.digital_media_consent = st.checkbox(
+        "I consent to AspireCraft using my photos, videos, or digital media for promotional and educational purposes.", 
+        value=st.session_state.digital_media_consent
+    )
+        
     # Path to the PDF file in the resources folder
     # pdf_file_path = os.path.join('resources', 'Student Privacy Notice_30.07.2024_Rev.1_FF.pdf')
     # Display the link for the PDF file to open in a new tab
@@ -1223,6 +1235,12 @@ elif st.session_state.step == 13:
     st.write(f"**Learning Preferences:** {st.session_state.learning_preferences}")
     st.write(f"**Special Requirements:** {st.session_state.special_requirements}")
     st.write(f"**Emergency Contact:** {st.session_state.emergency_contact}")
+    # Display whether digital media consent is provided
+    if st.session_state.digital_media_consent:
+        st.write("**Digital Media Consent:** Yes, consent provided.")
+    else:
+        st.write("**Digital Media Consent:** No, consent not provided.")
+    
 
     st.header("> 11: Signature")
     
@@ -1316,7 +1334,9 @@ elif st.session_state.step == 13:
             doc.add_paragraph(f"Learning Preferences: {st.session_state.learning_preferences}")
             doc.add_paragraph(f"Special Requirements: {st.session_state.special_requirements}")
             doc.add_paragraph(f"Emergency Contact: {st.session_state.emergency_contact}")
-
+            # Add Digital Media Consent to the document
+            digital_media_consent_status = "Yes, consent provided." if st.session_state.digital_media_consent else "No, consent not provided."
+            doc.add_paragraph(f"Digital Media Consent: {digital_media_consent_status}")
             
             # Add Signature
             doc.add_heading('Signature', level=1)
