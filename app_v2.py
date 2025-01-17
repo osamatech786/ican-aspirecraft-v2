@@ -87,8 +87,8 @@ def validate_phone_number(phone, dialing_code):
     if not number_without_code.isdigit():
         return False, "Phone number must contain only digits after the dialing code."
     
-    if not (10 <= len(number_without_code) <= 15):
-        return False, "Phone number must be between 10 and 15 digits long (excluding country code)."
+    # if not (10 <= len(number_without_code) <= 15):
+    #     return False, "Phone number must be between 10 and 15 digits long (excluding country code)."
     
     return True, ""
 
