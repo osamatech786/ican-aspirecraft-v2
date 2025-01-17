@@ -534,7 +534,7 @@ elif st.session_state.step == 7:
 
     # Text field for Current Role or Profession
     st.session_state.current_role = st.text_input(
-        "Current Role or Profession:",
+        "Current Role or Profession: (Indicate N/A if not working)",
         value=st.session_state.current_role
     )
 
