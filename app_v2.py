@@ -159,7 +159,7 @@ if 'step' not in st.session_state:
     st.session_state.country = ""  # Country of residence
     st.session_state.email = ""  # Email address
     st.session_state.phone = ""  # Phone number
-    st.session_state.address = ""  # Residential address
+    # st.session_state.address = ""  # Residential address
     st.session_state.current_institution = ""  # Current institution
     # st.session_state.start_date = None  # Uncomment if needed
     st.session_state.front_id_document = None  # Front ID document
@@ -384,8 +384,8 @@ elif st.session_state.step == 6:
         st.session_state.email = ""  # Default to empty string
     if 'phone' not in st.session_state:
         st.session_state.phone = ""  # Default to empty string
-    if 'address' not in st.session_state:
-        st.session_state.address = ""  # Default to empty string
+    # if 'address' not in st.session_state:
+    #     st.session_state.address = ""  # Default to empty string
 
     # Input fields for contact information
     st.session_state.email = st.text_input("Please enter your email address where we can reach you.", value=st.session_state.email)
@@ -427,10 +427,10 @@ elif st.session_state.step == 6:
     )
 
     # Input for address
-    st.session_state.address = st.text_area(
-        "Please enter your complete mailing address.", 
-        value=st.session_state.address
-    )
+    # st.session_state.address = st.text_area(
+    #     "Please enter your complete mailing address.", 
+    #     value=st.session_state.address
+    # )
 
     # Next and Back buttons for navigation
     next_clicked = st.button("Next", key=f"next_{st.session_state.step}")
@@ -438,7 +438,8 @@ elif st.session_state.step == 6:
 
     # Handle Next button click
     if next_clicked:
-        if st.session_state.phone and st.session_state.email and st.session_state.address:
+        # if st.session_state.phone and st.session_state.email and st.session_state.address:
+        if st.session_state.phone and st.session_state.email:
             if is_valid_email(st.session_state.email):
                 is_valid, message = validate_phone_number(st.session_state.phone, selected_dialing_code)
                 if is_valid:
@@ -610,6 +611,52 @@ elif st.session_state.step == 8:
                     index=(learning_modes.index(st.session_state.learning_mode) + 1) if st.session_state.learning_mode in learning_modes else 0
                 )
 
+            # Logic for "International Career Advice and Navigation (ICAN)"
+            elif area == "International Career Advice and Navigation (ICAN)":
+                st.subheader(area)
+
+                # Career Goals
+                st.session_state.career_goals = st.text_area(
+                    "Career Goals: Outline your career aspirations and sectors of interest:",
+                    value=st.session_state.get("career_goals", "")
+                )
+
+                # Reason for Interest
+                reason_for_interest_options = [
+                    "Select",
+                    "Career exploration and development",
+                    "CV building and job placement support",
+                    "Personalized career diagnostics"
+                ]
+                st.session_state.reason_for_interest_ican = st.selectbox(
+                    "Reason for Interest:",
+                    reason_for_interest_options,
+                    index=reason_for_interest_options.index(st.session_state.get("reason_for_interest_ican", "Select"))
+                )
+
+            # Logic for "Functional Skills Commerce"
+            elif area == "Functional Skills Commerce":
+                st.subheader(area)
+
+                # Input field for Current Role
+                st.session_state.functional_current_role = st.text_input(
+                    "Please specify your position (e.g., migrant worker, business owner):",
+                    value=st.session_state.get("functional_current_role", "")
+                )
+
+                # Select box for Reason for Interest
+                functional_reasons = [
+                    "Select",
+                    "To improve workplace communication and productivity.",
+                    "To meet employer expectations for functional skills.",
+                    "To access better employment opportunities."
+                ]
+                st.session_state.functional_reason_for_interest = st.selectbox(
+                    "Reason for Interest:",
+                    functional_reasons,
+                    index=functional_reasons.index(st.session_state.get("functional_reason_for_interest", "Select"))
+                )
+
             # Logic for "Teaching and Assessment Programme"
             elif area == "Teaching and Assessment Programme":
                 st.subheader(area)
@@ -700,6 +747,20 @@ elif st.session_state.step == 8:
                     if st.session_state.cohort_date in cohort_options else 0
                 )
 
+                # Reason for Interest selection (single choice)
+                reason_options = [
+                    "Select",
+                    "To gain hands-on work experience in UK hospitals or allied sectors.",
+                    "To enhance employability with practical international exposure.",
+                    "To participate in cultural and professional development activities."
+                ]
+
+                st.session_state.reason_for_interest = st.selectbox(
+                    "Please select your reason for interest:",
+                    reason_options,
+                    index=reason_options.index(st.session_state.reason_for_interest)
+                    if st.session_state.get('reason_for_interest') in reason_options else 0
+                )
 
                 # Explanations for Basic and Premium packages
                 st.write("### Basic Package (Included for All Students):")
@@ -848,13 +909,6 @@ elif st.session_state.step == 8:
                         st.warning(f"[{subject_area}] Please select your reason for taking the IELTS exam before proceeding.")
                         all_valid = False
 
-                elif subject_area == "International Career Advice and Navigation (ICAN)":
-                    # Add default or required processing logic for ICAN
-                    st.session_state.selected_course[subject_area] = {
-                        "details": "No specific additional details required for ICAN at this step."
-                    }
-
-
                 elif subject_area == "CPD Courses":
                     if st.session_state.courses and st.session_state.learning_mode_cpd != "Select":
                         st.session_state.selected_course[subject_area] = {
@@ -866,6 +920,22 @@ elif st.session_state.step == 8:
                         st.warning(f"[{subject_area}] Please select your courses before proceeding.")
                         all_valid = False
 
+                elif subject_area == "International Career Advice and Navigation (ICAN)":
+                    if (
+                        st.session_state.career_goals.strip() and
+                        st.session_state.reason_for_interest_ican != "Select"
+                    ):
+                        st.session_state.selected_course[subject_area] = {
+                            'career_goals': st.session_state.career_goals,
+                            'reason_for_interest': st.session_state.reason_for_interest_ican
+                        }
+                    else:
+                        if not st.session_state.career_goals.strip():
+                            st.warning(f"[{subject_area}] Please outline your career goals before proceeding.")
+                        if st.session_state.reason_for_interest_ican == "Select":
+                            st.warning(f"[{subject_area}] Please select your reason for interest before proceeding.")
+                        all_valid = False
+
                 elif subject_area == "University Success (Admissions Support)":
                     if st.session_state.sub_option != "Select" and st.session_state.learning_mode != "Select":
                         st.session_state.selected_course[subject_area] = {
@@ -874,6 +944,22 @@ elif st.session_state.step == 8:
                         }
                     else:
                         st.warning(f"[{subject_area}] Please select the course level and learning mode before proceeding.")
+                        all_valid = False
+
+                elif subject_area == "Functional Skills Commerce":
+                    if (
+                        st.session_state.functional_current_role.strip() and
+                        st.session_state.functional_reason_for_interest != "Select"
+                    ):
+                        st.session_state.selected_course[subject_area] = {
+                            "current_role": st.session_state.functional_current_role,
+                            "reason_for_interest": st.session_state.functional_reason_for_interest
+                        }
+                    else:
+                        if not st.session_state.functional_current_role.strip():
+                            st.warning(f"[{subject_area}] Please specify your current role before proceeding.")
+                        if st.session_state.functional_reason_for_interest == "Select":
+                            st.warning(f"[{subject_area}] Please select a reason for interest before proceeding.")
                         all_valid = False
 
                 elif subject_area == "Teaching and Assessment Programme":
@@ -904,21 +990,29 @@ elif st.session_state.step == 8:
                         all_valid = False
 
                 elif subject_area == "Summer International Internship Programme":
-                    if st.session_state.internship_package != "Select" and st.session_state.cohort_date != "Select":
+                    if (
+                        st.session_state.internship_package != "Select"
+                        and st.session_state.cohort_date != "Select"
+                        and st.session_state.reason_for_interest != "Select"
+                    ):
                         st.session_state.selected_course[subject_area] = {
                             'internship_package': st.session_state.internship_package,
-                            'cohort_date': st.session_state.cohort_date
+                            'cohort_date': st.session_state.cohort_date,
+                            'reason_for_interest': st.session_state.reason_for_interest
                         }
                     else:
                         if st.session_state.internship_package == "Select":
                             st.warning(f"[{subject_area}] Please select a package (Basic or Premium) before proceeding.")
                         if st.session_state.cohort_date == "Select":
                             st.warning(f"[{subject_area}] Please select a cohort date before proceeding.")
+                        if st.session_state.reason_for_interest == "Select":
+                            st.warning(f"[{subject_area}] Please select a reason for interest before proceeding.")
                         all_valid = False
+
 
             # If all validations pass, move to the next step
             if all_valid:
-                st.session_state.step = 9
+                st.session_state.step = 11
                 st.experimental_rerun()
             # else:
             #     st.warning("Please complete all required fields before proceeding.")
@@ -1094,7 +1188,7 @@ elif st.session_state.step == 11:
 
     # Handle Back button click
     if back_clicked:
-        st.session_state.step = 10 
+        st.session_state.step = 8
         st.experimental_rerun()
 
 
@@ -1152,7 +1246,7 @@ elif st.session_state.step == 13:
 
     st.write(f"**Email:** {st.session_state.email}")
     st.write(f"**Phone:** {st.session_state.phone}")
-    st.write(f"**Address:** {st.session_state.address}")
+    # st.write(f"**Address:** {st.session_state.address}")
     
     st.header("> 6: Educational and Professional Background")
 
@@ -1183,10 +1277,18 @@ elif st.session_state.step == 13:
                 st.write(f"- **Category:** {details.get('category', 'Not Provided')}")
                 st.write(f"- **Courses:** {', '.join(details.get('courses', []))}")
                 st.write(f"- **Learning Mode:** {details.get('learning_mode_cpd', 'Not Provided')}")
+
+            elif subject_area == "International Career Advice and Navigation (ICAN)":
+                st.write(f"- **Career Goals:** {details.get('career_goals', 'Not Provided')}")
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
             
             elif subject_area == "University Success (Admissions Support)":
                 st.write(f"- **Course Level:** {details.get('course_level', 'Not Provided')}")
                 st.write(f"- **Learning Mode:** {details.get('learning_mode', 'Not Provided')}")
+            
+            elif subject_area == "Functional Skills Commerce":
+                st.write(f"- **Current Role:** {details.get('current_role', 'Not Provided')}")
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
             
             elif subject_area == "Teaching and Assessment Programme":
                 st.write(f"- **Qualification or Experience:** {details.get('qualification_or_experience', 'Not Provided')}")
@@ -1200,15 +1302,14 @@ elif st.session_state.step == 13:
             elif subject_area == "Summer International Internship Programme":
                 st.write(f"- **Internship Package:** {details.get('internship_package', 'Not Provided')}")
                 st.write(f"- **Cohort Date:** {details.get('cohort_date', 'Not Provided')}")
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
+
 
             elif subject_area == "IELTS":
                 st.write(f"- **IELTS Reason:** {details.get('ielts_reason', 'Not Provided')}")
 
             elif subject_area == "Business Incubation Services":
                 st.write(f"- **Business Services:** {', '.join(details.get('business_services', []))}")
-
-            elif subject_area == "International Career Advice and Navigation (ICAN)":
-                st.write(f"- **Details:** {details.get('details', 'Not Provided')}")
 
             else:
                 st.write("No specific fields defined for this subject area.")
@@ -1217,16 +1318,16 @@ elif st.session_state.step == 13:
 
 
 
-    st.header("> 8 & 9: Supporting Documents (Optional)")
+    # st.header("> 8 & 9: Supporting Documents (Optional)")
 
-    # Combine files from both steps for display purposes
-    all_files = st.session_state.get("files_step_9", []) + st.session_state.get("files_step_10", [])
-    if all_files:
-        st.write(f"**Total Files Uploaded:** {len(all_files)}")
-        for file in all_files:
-            st.write(f"- **File Name:** {file.name}")
-    else:
-        st.write("No files uploaded.")
+    # # Combine files from both steps for display purposes
+    # all_files = st.session_state.get("files_step_9", []) + st.session_state.get("files_step_10", [])
+    # if all_files:
+    #     st.write(f"**Total Files Uploaded:** {len(all_files)}")
+    #     for file in all_files:
+    #         st.write(f"- **File Name:** {file.name}")
+    # else:
+    #     st.write("No files uploaded.")
 
         
     st.header("> 10: Additional Information")
@@ -1274,7 +1375,7 @@ elif st.session_state.step == 13:
             doc.add_heading('Contact Information', level=1)
             doc.add_paragraph(f"Email: {st.session_state.email}")
             doc.add_paragraph(f"Phone: {st.session_state.phone}")
-            doc.add_paragraph(f"Address: {st.session_state.address}")
+            # doc.add_paragraph(f"Address: {st.session_state.address}")
 
             # Add Educational and Professional Background
             doc.add_heading('Educational and Professional Background', level=1)
@@ -1296,9 +1397,15 @@ elif st.session_state.step == 13:
                         doc.add_paragraph(f"Category: {details.get('category', 'Not Provided')}")
                         doc.add_paragraph(f"Courses: {', '.join(details.get('courses', []))}")
                         doc.add_paragraph(f"Learning Mode: {details.get('learning_mode_cpd', 'Not Provided')}")
+                    elif subject_area == "International Career Advice and Navigation (ICAN)":
+                        doc.add_paragraph(f"Career Goals: {details.get('career_goals', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
                     elif subject_area == "University Success (Admissions Support)":
                         doc.add_paragraph(f"Course Level: {details.get('course_level', 'Not Provided')}")
                         doc.add_paragraph(f"Learning Mode: {details.get('learning_mode', 'Not Provided')}")
+                    elif subject_area == "Functional Skills Commerce":
+                        doc.add_paragraph(f"Current Role: {details.get('current_role', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
                     elif subject_area == "Teaching and Assessment Programme":
                         doc.add_paragraph(f"Qualification or Experience: {details.get('qualification_or_experience', 'Not Provided')}")
                         doc.add_paragraph(f"Vocational Sector: {details.get('vocational_sector', 'Not Provided')}")
@@ -1309,24 +1416,23 @@ elif st.session_state.step == 13:
                     elif subject_area == "Summer International Internship Programme":
                         doc.add_paragraph(f"Internship Package: {details.get('internship_package', 'Not Provided')}")
                         doc.add_paragraph(f"Cohort Date: {details.get('cohort_date', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
                     elif subject_area == "IELTS":
                         doc.add_paragraph(f"IELTS Reason: {details.get('ielts_reason', 'Not Provided')}")
                     elif subject_area == "Business Incubation Services":
                         doc.add_paragraph(f"Business Services: {', '.join(details.get('business_services', []))}")
-                    elif subject_area == "International Career Advice and Navigation (ICAN)":
-                        doc.add_paragraph(f"Details: {details.get('details', 'Not Provided')}")
             else:
                 doc.add_paragraph("Courses Interested In: None")
 
             # Add Supporting Documents
-            doc.add_heading('Supporting Documents (Optional)', level=1)
-            all_files = st.session_state.get("files_step_9", []) + st.session_state.get("files_step_10", [])
-            if all_files:
-                doc.add_paragraph(f"Total Files Uploaded: {len(all_files)}")
-                for file in all_files:
-                    doc.add_paragraph(f"- File Name: {file.name}")
-            else:
-                doc.add_paragraph("No files uploaded.")
+            # doc.add_heading('Supporting Documents (Optional)', level=1)
+            # all_files = st.session_state.get("files_step_9", []) + st.session_state.get("files_step_10", [])
+            # if all_files:
+            #     doc.add_paragraph(f"Total Files Uploaded: {len(all_files)}")
+            #     for file in all_files:
+            #         doc.add_paragraph(f"- File Name: {file.name}")
+            # else:
+            #     doc.add_paragraph("No files uploaded.")
 
             # Add Additional Information
             doc.add_heading('Additional Information', level=1)
@@ -1415,7 +1521,8 @@ elif st.session_state.step == 13:
 
             # Send email to team with attachments
             if doc_path:
-                send_email_with_attachments(sender_email, sender_password, team_email, subject_team, body_team, all_files, doc_path)
+                # send_email_with_attachments(sender_email, sender_password, team_email, subject_team, body_team, all_files, doc_path)
+                send_email_with_attachments(sender_email, sender_password, team_email, subject_team, body_team, local_file_path=doc_path)
                 # pass
             # Send thank you email to learner
             send_email_with_attachments(sender_email, sender_password, learner_email, subject_learner, body_learner)
