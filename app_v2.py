@@ -617,6 +617,13 @@ elif st.session_state.step == 8:
         st.session_state.subject_areas = []
     if "previous_subject_areas" not in st.session_state:
         st.session_state.previous_subject_areas = []
+    if "reason_for_interest_accreditation" not in st.session_state:
+        st.session_state.reason_for_interest_accreditation = "Select"
+    if "reason_for_interest_us" not in st.session_state:
+            st.session_state.reason_for_interest_us = "Select"
+                    
+        
+        
 
     # Display multiselect for subject areas
     selected_subject_areas = st.multiselect(
@@ -646,17 +653,63 @@ elif st.session_state.step == 8:
             # Logic for "University Success (Admissions Support)"
             if area == "University Success (Admissions Support)":
                 st.subheader(area)
+                
+                # Course Level Selection
                 st.session_state.sub_option = st.selectbox(
                     "Please select your course level.",
                     ["Select"] + sub_options,
                     index=(sub_options.index(st.session_state.sub_option) + 1) if st.session_state.sub_option in sub_options else 0
                 )
 
+                # Learning Mode Selection
                 st.session_state.learning_mode = st.selectbox(
                     "Please select the learning mode.",
                     ["Select"] + learning_modes,
                     index=(learning_modes.index(st.session_state.learning_mode) + 1) if st.session_state.learning_mode in learning_modes else 0
                 )
+
+                # Higher Education Goals
+                st.session_state.higher_education_goals = st.text_area(
+                    "Higher Education Goals: Specify target countries, universities, or courses.",
+                    value=st.session_state.get("higher_education_goals", "")
+                )
+
+                # Assistance Needed
+                assistance_options = [
+                    "Portfolio development",
+                    "IELTS preparation",
+                    "Application documentation",
+                    "Scholarship assistance",
+                    "Other (please specify)"
+                ]
+                st.session_state.assistance_needed = st.multiselect(
+                    "Assistance Needed: Select areas of support.",
+                    options=assistance_options,
+                    default=st.session_state.get("assistance_needed", [])
+                )
+
+                # Conditional text input if "Other" is selected
+                if "Other (please specify)" in st.session_state.assistance_needed:
+                    st.session_state.assistance_other = st.text_input(
+                        "Please specify the additional assistance needed:",
+                        value=st.session_state.get("assistance_other", "")
+                    )
+                else:
+                    # Reset the other assistance field if "Other" is not selected
+                    st.session_state.assistance_other = ""
+
+                # Reason for Interest
+                reason_options = [
+                    "Simplifying university applications",
+                    "Securing admissions abroad",
+                    "Personalized guidance for successful placement"
+                ]
+                st.session_state.reason_for_interest_us = st.selectbox(
+                    "Reason for Interest:",
+                    ["Select"] + reason_options,
+                    index=(reason_options.index(st.session_state.reason_for_interest_us) + 1) if st.session_state.reason_for_interest_us in reason_options else 0
+                )
+
 
             # Logic for "International Career Advice and Navigation (ICAN)"
             elif area == "International Career Advice and Navigation (ICAN)":
@@ -706,54 +759,72 @@ elif st.session_state.step == 8:
 
             # Logic for "Teaching and Assessment Programme"
             elif area == "Teaching and Assessment Programme":
-                st.subheader(area)
-                # Qualification or experience selection
-                st.session_state.qualification_or_experience = st.selectbox(
-                    "Please choose one of the following:",
-                    ["Select", "An accredited qualification", "More than 2 years of professional industry work experience"],
-                    index=["Select", "An accredited qualification", "More than 2 years of professional industry work experience"].index(
-                        st.session_state.qualification_or_experience
-                    )
+                st.subheader("Teacher & Assessment Training")
+                st.write(
+                    """
+                    Please select your professional vocational sector where you have:
+                    - An accredited qualification.
+                    - More than 2 years of professional industry work experience.
+                    """
+                )
+                
+                # Vocational sector options
+                vocational_options = [
+                    "Health & Social Care",
+                    "Construction & Engineering",
+                    "Business & Administration",
+                    "Digital & IT",
+                    "Education & Training",
+                    "Retail & Customer Service",
+                    "Hospitality & Tourism",
+                    "Creative Arts & Media",
+                    "Other (please specify)"
+                ]
+                
+                # Multi-select for vocational sectors
+                st.session_state.selected_vocational_sectors = st.multiselect(
+                    "Please select your vocational sector(s):",
+                    vocational_options,
+                    default=st.session_state.get("selected_vocational_sectors", [])
                 )
 
-                # Display vocational sector options if experience is selected
-                if st.session_state.qualification_or_experience == "More than 2 years of professional industry work experience":
-                    vocational_options = [
-                        "Select",
-                        "Health & Social Care",
-                        "Construction & Engineering",
-                        "Business & Administration",
-                        "Digital & IT",
-                        "Education & Training",
-                        "Retail & Customer Service",
-                        "Hospitality & Tourism",
-                        "Creative Arts & Media",
-                        "Other (please specify)"
-                    ]
-
-                    st.session_state.vocational_sector = st.selectbox(
-                        "Please select your professional vocational sector:",
-                        vocational_options,
-                        index=vocational_options.index(st.session_state.vocational_sector) if st.session_state.vocational_sector in vocational_options else 0
-                    )
-
-                    # Text input if "Other" is selected
-                    if st.session_state.vocational_sector == "Other (please specify)":
-                        st.session_state.vocational_other = st.text_input(
-                            "Please specify your vocational sector:",
-                            value=st.session_state.vocational_other
+                # For each selected sector, add additional input fields
+                st.write("### Details for Selected Sectors")
+                sector_details = {}
+                for sector in st.session_state.selected_vocational_sectors:
+                    with st.expander(f"Details for {sector}"):
+                        sector_details[sector] = st.text_area(
+                            f"Specify your sector(s) with accredited qualifications and work experience for {sector}:",
+                            value=st.session_state.get(f"sector_details_{sector}", "")
                         )
-                    else:
-                        st.session_state.vocational_other = ""
-                else:
-                    # Reset vocational fields if experience is not selected
-                    st.session_state.vocational_sector = "Select"
-                    st.session_state.vocational_other = ""
-                    
+                        st.session_state[f"sector_details_{sector}"] = sector_details[sector]
+
+                # Work Aspirations
+                st.session_state.work_aspirations = st.selectbox(
+                    "Are you interested in working for a UK teacher recruitment agency?",
+                    ["Select", "Yes", "No"],
+                    index=["Select", "Yes", "No"].index(st.session_state.get("work_aspirations", "Select"))
+                )
+
+                # Reason for Interest
+                reason_options = [
+                    "To gain qualifications as an accredited educator.",
+                    "To enhance teaching skills and pedagogy.",
+                    "To achieve UK tutor certification and recognition.",
+                    "To deliver affordable, high-quality education globally."
+                ]
+                
+                st.session_state.reason_for_interest_tap = st.radio(
+                    "Please select your reason for interest:",
+                    options=reason_options,
+                    index=reason_options.index(st.session_state.get("reason_for_interest_tap", reason_options[0]))
+                )
 
             # Logic for "International Accredited Courses"
             elif area == "International Accredited Courses":
                 st.subheader(area)
+                
+                # Sector Accreditation Options
                 accreditation_options = [
                     "Select",
                     "Health, public services and care",
@@ -762,16 +833,42 @@ elif st.session_state.step == 8:
                     "Arts, media and publishing",
                     "Education and training",
                     "Preparation for Life and Work",
-                    "Business, administration and law"
+                    "Business, administration and law",
+                    "Digital Transformation",
+                    "Sustainability"
                 ]
 
-                # Use concise index calculation
+                # Select Sector Accreditation
                 st.session_state.sector_accreditation = st.selectbox(
                     "Which sector do you wish to achieve accreditation?",
                     accreditation_options,
                     index=accreditation_options.index(st.session_state.sector_accreditation)
                     if st.session_state.sector_accreditation in accreditation_options else 0
                 )
+
+                # Reason for Interest
+                st.session_state.reason_for_interest_accreditation = st.selectbox(
+                    "Reason for Interest:",
+                    [
+                        "Select",
+                        "To advance your career with globally recognized qualifications.",
+                        "To meet employer requirements for niche skills.",
+                        "To gain expertise in emerging markets."
+                    ],
+                    index=[
+                        "Select",
+                        "To advance your career with globally recognized qualifications.",
+                        "To meet employer requirements for niche skills.",
+                        "To gain expertise in emerging markets."
+                    ].index(st.session_state.reason_for_interest_accreditation)
+                    if st.session_state.reason_for_interest_accreditation in [
+                        "Select",
+                        "To advance your career with globally recognized qualifications.",
+                        "To meet employer requirements for niche skills.",
+                        "To gain expertise in emerging markets."
+                    ] else 0
+                )
+
 
             # Logic for "Summer International Internship Programme"
             elif area == "Summer International Internship Programme":
@@ -803,11 +900,11 @@ elif st.session_state.step == 8:
                     "To participate in cultural and professional development activities."
                 ]
 
-                st.session_state.reason_for_interest = st.selectbox(
+                st.session_state.reason_for_interest_siip = st.selectbox(
                     "Please select your reason for interest:",
                     reason_options,
-                    index=reason_options.index(st.session_state.reason_for_interest)
-                    if st.session_state.get('reason_for_interest') in reason_options else 0
+                    index=reason_options.index(st.session_state.reason_for_interest_siip)
+                    if st.session_state.get('reason_for_interest_siip') in reason_options else 0
                 )
 
                 # Explanations for Basic and Premium packages
@@ -888,13 +985,13 @@ elif st.session_state.step == 8:
 
                 # Update session state with selected courses
                 st.session_state.courses = selected_courses
-                
                 st.session_state.learning_mode_cpd = st.selectbox(
                     "Please select your preferred mode of learning.", 
                     ["Online", "Blended", "On-Campus"],
-                    index=["Online"].index(st.session_state.learning_mode_cpd)  # Set default based on session state
-                )        
-                        
+                    index=(["Online", "Blended", "On-Campus"].index(st.session_state.learning_mode_cpd)
+                        if st.session_state.get('learning_mode_cpd') in ["Online", "Blended", "On-Campus"] else 0)
+                )
+
             # Logic for "Business Incubation Services"
             elif area == "Business Incubation Services":
                 st.subheader(area)
@@ -940,13 +1037,18 @@ elif st.session_state.step == 8:
             # Iterate through each selected subject area
             for subject_area in st.session_state.subject_areas:
                 if subject_area == "International Accredited Courses":
-                    if st.session_state.sector_accreditation != "Select":
+                    if st.session_state.sector_accreditation != "Select" and st.session_state.reason_for_interest_accreditation != "Select":
                         st.session_state.selected_course[subject_area] = {
-                            'sector_accreditation': st.session_state.sector_accreditation
+                            'sector_accreditation': st.session_state.sector_accreditation,
+                            'reason_for_interest_accreditation': st.session_state.reason_for_interest_accreditation
                         }
                     else:
-                        st.warning(f"[{subject_area}] Please select a sector before proceeding.")
+                        if st.session_state.sector_accreditation == "Select":
+                            st.warning(f"[{subject_area}] Please select a sector before proceeding.")
+                        if st.session_state.reason_for_interest_accreditation == "Select":
+                            st.warning(f"[{subject_area}] Please select a reason for your interest before proceeding.")
                         all_valid = False
+
 
                 elif subject_area == "IELTS":
                     if st.session_state.ielts_reason != "Select":
@@ -975,7 +1077,7 @@ elif st.session_state.step == 8:
                     ):
                         st.session_state.selected_course[subject_area] = {
                             'career_goals': st.session_state.career_goals,
-                            'reason_for_interest': st.session_state.reason_for_interest_ican
+                            'reason_for_interest_ican': st.session_state.reason_for_interest_ican
                         }
                     else:
                         if not st.session_state.career_goals.strip():
@@ -985,13 +1087,40 @@ elif st.session_state.step == 8:
                         all_valid = False
 
                 elif subject_area == "University Success (Admissions Support)":
-                    if st.session_state.sub_option != "Select" and st.session_state.learning_mode != "Select":
+                    if (
+                        st.session_state.sub_option != "Select" and
+                        st.session_state.learning_mode != "Select" and
+                        st.session_state.higher_education_goals.strip() and
+                        st.session_state.assistance_needed and
+                        st.session_state.reason_for_interest_us != "Select" and
+                        (
+                            "Other (please specify)" not in st.session_state.assistance_needed or
+                            st.session_state.assistance_other.strip()
+                        )
+                    ):
+                        # Save the selected course details
                         st.session_state.selected_course[subject_area] = {
                             'course_level': st.session_state.sub_option,
-                            'learning_mode': st.session_state.learning_mode
+                            'learning_mode': st.session_state.learning_mode,
+                            'higher_education_goals': st.session_state.higher_education_goals,
+                            'assistance_needed': st.session_state.assistance_needed,
+                            'assistance_other': st.session_state.assistance_other if "Other (please specify)" in st.session_state.assistance_needed else "",
+                            'reason_for_interest_us': st.session_state.reason_for_interest_us
                         }
                     else:
-                        st.warning(f"[{subject_area}] Please select the course level and learning mode before proceeding.")
+                        # Display warnings for missing fields
+                        if st.session_state.sub_option == "Select":
+                            st.warning(f"[{subject_area}] Please select the course level before proceeding.")
+                        if st.session_state.learning_mode == "Select":
+                            st.warning(f"[{subject_area}] Please select the learning mode before proceeding.")
+                        if not st.session_state.higher_education_goals.strip():
+                            st.warning(f"[{subject_area}] Please specify your higher education goals before proceeding.")
+                        if not st.session_state.assistance_needed:
+                            st.warning(f"[{subject_area}] Please select at least one area of assistance before proceeding.")
+                        if "Other (please specify)" in st.session_state.assistance_needed and not st.session_state.assistance_other.strip():
+                            st.warning(f"[{subject_area}] Please specify the additional assistance needed for 'Other'.")
+                        if st.session_state.reason_for_interest_us == "Select":
+                            st.warning(f"[{subject_area}] Please select your reason for interest before proceeding.")
                         all_valid = False
 
                 elif subject_area == "Functional Skills Commerce (English & Math Training)":
@@ -1001,7 +1130,7 @@ elif st.session_state.step == 8:
                     ):
                         st.session_state.selected_course[subject_area] = {
                             "current_role": st.session_state.functional_current_role,
-                            "reason_for_interest": st.session_state.functional_reason_for_interest
+                            "functional_reason_for_interest": st.session_state.functional_reason_for_interest
                         }
                     else:
                         if not st.session_state.functional_current_role.strip():
@@ -1011,22 +1140,44 @@ elif st.session_state.step == 8:
                         all_valid = False
 
                 elif subject_area == "Teaching and Assessment Programme":
-                    if st.session_state.qualification_or_experience == "Select":
-                        st.warning(f"[{subject_area}] Please select an option (accredited qualification or industry experience).")
-                        all_valid = False
-                    elif (
-                        st.session_state.qualification_or_experience == "More than 2 years of professional industry work experience"
-                        and (st.session_state.vocational_sector == "Select" or (
-                            st.session_state.vocational_sector == "Other (please specify)" and not st.session_state.vocational_other.strip()))
-                    ):
-                        st.warning(f"[{subject_area}] Please select your vocational sector and specify if applicable.")
+                    # Validate vocational sector selection
+                    if not st.session_state.selected_vocational_sectors:
+                        st.warning(f"[{subject_area}] Please select at least one vocational sector.")
                         all_valid = False
                     else:
-                        st.session_state.selected_course[subject_area] = {
-                            'qualification_or_experience': st.session_state.qualification_or_experience,
-                            'vocational_sector': st.session_state.vocational_sector,
-                            'vocational_other': st.session_state.vocational_other
+                        # Validate details for each selected sector
+                        for sector in st.session_state.selected_vocational_sectors:
+                            if not st.session_state.get(f"sector_details_{sector}", "").strip():
+                                st.warning(f"[{subject_area}] Please provide details for the selected sector: {sector}.")
+                                all_valid = False
+                                break
+
+                    # Validate work aspirations
+                    if st.session_state.work_aspirations == "Select":
+                        st.warning(f"[{subject_area}] Please indicate your interest in working for a UK teacher recruitment agency.")
+                        all_valid = False
+
+                    # Validate reason for interest
+                    if not st.session_state.reason_for_interest_tap:
+                        st.warning(f"[{subject_area}] Please select a reason for interest.")
+                        all_valid = False
+
+                    # If all validations pass, save the data
+                    if all_valid:
+                        # Prepare sector details
+                        sector_details = {
+                            sector: st.session_state.get(f"sector_details_{sector}", "").strip()
+                            for sector in st.session_state.selected_vocational_sectors
                         }
+
+                        # Save the data to `selected_course`
+                        st.session_state.selected_course[subject_area] = {
+                            'selected_vocational_sectors': st.session_state.selected_vocational_sectors,
+                            'sector_details': sector_details,
+                            'work_aspirations': st.session_state.work_aspirations,
+                            'reason_for_interest_tap': st.session_state.reason_for_interest_tap
+                        }
+
 
                 elif subject_area == "Business Incubation Services":
                     if st.session_state.business_services:
@@ -1041,19 +1192,19 @@ elif st.session_state.step == 8:
                     if (
                         st.session_state.internship_package != "Select"
                         and st.session_state.cohort_date != "Select"
-                        and st.session_state.reason_for_interest != "Select"
+                        and st.session_state.reason_for_interest_siip != "Select"
                     ):
                         st.session_state.selected_course[subject_area] = {
                             'internship_package': st.session_state.internship_package,
                             'cohort_date': st.session_state.cohort_date,
-                            'reason_for_interest': st.session_state.reason_for_interest
+                            'reason_for_interest_siip': st.session_state.reason_for_interest_siip
                         }
                     else:
                         if st.session_state.internship_package == "Select":
                             st.warning(f"[{subject_area}] Please select a package (Basic or Premium) before proceeding.")
                         if st.session_state.cohort_date == "Select":
                             st.warning(f"[{subject_area}] Please select a cohort date before proceeding.")
-                        if st.session_state.reason_for_interest == "Select":
+                        if st.session_state.reason_for_interest_siip == "Select":
                             st.warning(f"[{subject_area}] Please select a reason for interest before proceeding.")
                         all_valid = False
 
@@ -1328,30 +1479,62 @@ elif st.session_state.step == 13:
 
             elif subject_area == "International Career Advice and Navigation (ICAN)":
                 st.write(f"- **Career Goals:** {details.get('career_goals', 'Not Provided')}")
-                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest_ican', 'Not Provided')}")
             
             elif subject_area == "University Success (Admissions Support)":
                 st.write(f"- **Course Level:** {details.get('course_level', 'Not Provided')}")
                 st.write(f"- **Learning Mode:** {details.get('learning_mode', 'Not Provided')}")
-            
+                st.write(f"- **Higher Education Goals:** {details.get('higher_education_goals', 'Not Provided')}")
+                
+                assistance_needed = details.get('assistance_needed', [])
+                assistance_other = details.get('assistance_other', '')
+
+                if assistance_needed:
+                    assistance_display = ', '.join(assistance_needed)
+                    if "Other (please specify)" in assistance_needed and assistance_other:
+                        assistance_display += f" (Other: {assistance_other})"
+                    st.write(f"- **Assistance Needed:** {assistance_display}")
+                else:
+                    st.write("- **Assistance Needed:** Not Provided")
+                
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest_us', 'Not Provided')}")
+
+
             elif subject_area == "Functional Skills Commerce (English & Math Training)":
                 st.write(f"- **Current Role:** {details.get('current_role', 'Not Provided')}")
-                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
+                st.write(f"- **Reason for Interest:** {details.get('functional_reason_for_interest', 'Not Provided')}")
             
             elif subject_area == "Teaching and Assessment Programme":
-                st.write(f"- **Qualification or Experience:** {details.get('qualification_or_experience', 'Not Provided')}")
-                st.write(f"- **Vocational Sector:** {details.get('vocational_sector', 'Not Provided')}")
-                if details.get("vocational_other"):
-                    st.write(f"- **Other Vocational Sector:** {details.get('vocational_other')}")
+                # Display Selected Vocational Sectors
+                selected_sectors = details.get('selected_vocational_sectors', [])
+                if selected_sectors:
+                    st.write(f"- **Selected Vocational Sectors:**")
+                    for sector in selected_sectors:
+                        st.write(f"  - {sector}")
+                        # Display details for each sector
+                        sector_details = details.get('sector_details', {}).get(sector, 'Not Provided')
+                        st.write(f"    - **Details:** {sector_details}")
+                else:
+                    st.write(f"- **Selected Vocational Sectors:** None")
+
+                # Display Work Aspirations
+                st.write(f"- **Work Aspirations for a UK teacher recruitment agency:** {details.get('work_aspirations', 'Not Provided')}")
+
+                # Display Reason for Interest
+                reason_for_interest_tap = details.get('reason_for_interest_tap', [])
+                if reason_for_interest_tap:
+                    st.write(f"- **Reason for Interest:** {reason_for_interest_tap}")
+                else:
+                    st.write(f"- **Reason for Interest:** Not Provided")
 
             elif subject_area == "International Accredited Courses":
                 st.write(f"- **Sector Accreditation:** {details.get('sector_accreditation', 'Not Provided')}")
-            
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest_accreditation', 'Not Provided')}")
+
             elif subject_area == "Summer International Internship Programme":
                 st.write(f"- **Internship Package:** {details.get('internship_package', 'Not Provided')}")
                 st.write(f"- **Cohort Date:** {details.get('cohort_date', 'Not Provided')}")
-                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
-
+                st.write(f"- **Reason for Interest:** {details.get('reason_for_interest_siip', 'Not Provided')}")
 
             elif subject_area == "IELTS":
                 st.write(f"- **IELTS Reason:** {details.get('ielts_reason', 'Not Provided')}")
@@ -1467,24 +1650,50 @@ elif st.session_state.step == 13:
                         doc.add_paragraph(f"Learning Mode: {details.get('learning_mode_cpd', 'Not Provided')}")
                     elif subject_area == "International Career Advice and Navigation (ICAN)":
                         doc.add_paragraph(f"Career Goals: {details.get('career_goals', 'Not Provided')}")
-                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest_ican', 'Not Provided')}")
                     elif subject_area == "University Success (Admissions Support)":
                         doc.add_paragraph(f"Course Level: {details.get('course_level', 'Not Provided')}")
                         doc.add_paragraph(f"Learning Mode: {details.get('learning_mode', 'Not Provided')}")
+                        doc.add_paragraph(f"Higher Education Goals: {details.get('higher_education_goals', 'Not Provided')}")
+                        # Handle assistance needed and "Other" option
+                        assistance_needed = details.get('assistance_needed', [])
+                        assistance_other = details.get('assistance_other', '')
+                        if assistance_needed:
+                            assistance_display = ', '.join(assistance_needed)
+                            if "Other (please specify)" in assistance_needed and assistance_other:
+                                assistance_display += f" (Other: {assistance_other})"
+                            doc.add_paragraph(f"Assistance Needed: {assistance_display}")
+                        else:
+                            doc.add_paragraph("Assistance Needed: Not Provided")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest_us', 'Not Provided')}")
+
+
                     elif subject_area == "Functional Skills Commerce (English & Math Training)":
                         doc.add_paragraph(f"Current Role: {details.get('current_role', 'Not Provided')}")
-                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('functional_reason_for_interest', 'Not Provided')}")
                     elif subject_area == "Teaching and Assessment Programme":
-                        doc.add_paragraph(f"Qualification or Experience: {details.get('qualification_or_experience', 'Not Provided')}")
-                        doc.add_paragraph(f"Vocational Sector: {details.get('vocational_sector', 'Not Provided')}")
-                        if details.get("vocational_other"):
-                            doc.add_paragraph(f"Other Vocational Sector: {details.get('vocational_other')}")
+                        # Add Selected Vocational Sectors
+                        selected_sectors = details.get('selected_vocational_sectors', [])
+                        if selected_sectors:
+                            doc.add_paragraph("Selected Vocational Sectors:")
+                            for sector in selected_sectors:
+                                doc.add_paragraph(f"  - {sector}", style="List Bullet")
+                                # Add details for each sector
+                                sector_details = details.get('sector_details', {}).get(sector, 'Not Provided')
+                                doc.add_paragraph(f"    Details: {sector_details}")
+                        # Add Work Aspirations
+                        work_aspirations = details.get('work_aspirations', 'Not Provided')
+                        doc.add_paragraph(f"Work Aspirations for a UK teacher recruitment agency: {work_aspirations}")
+                        # Add Reason for Interest
+                        reason_for_interest_tap = details.get('reason_for_interest_tap', [])
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest_tap', 'Not Provided')}")
                     elif subject_area == "International Accredited Courses":
                         doc.add_paragraph(f"Sector Accreditation: {details.get('sector_accreditation', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest_accreditation', 'Not Provided')}")
                     elif subject_area == "Summer International Internship Programme":
                         doc.add_paragraph(f"Internship Package: {details.get('internship_package', 'Not Provided')}")
                         doc.add_paragraph(f"Cohort Date: {details.get('cohort_date', 'Not Provided')}")
-                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
+                        doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest_siip', 'Not Provided')}")
                     elif subject_area == "IELTS":
                         doc.add_paragraph(f"IELTS Reason: {details.get('ielts_reason', 'Not Provided')}")
                     elif subject_area == "Business Incubation Services":
