@@ -158,7 +158,7 @@ if 'step' not in st.session_state:
     st.session_state.gender = "Select"  # Gender
     st.session_state.country = ""  # Country of residence
     st.session_state.email = ""  # Email address
-    st.session_state.phone = ""  # Phone number
+    # st.session_state.phone = ""  # Phone number
     # st.session_state.address = ""  # Residential address
     st.session_state.current_institution = ""  # Current institution
     # st.session_state.start_date = None  # Uncomment if needed
@@ -166,9 +166,9 @@ if 'step' not in st.session_state:
     st.session_state.back_id_document = None  # Back ID document
     st.session_state.address_proof = None  # Address proof document
     st.session_state.additional_document = None  # Additional documents if needed
-    st.session_state.learning_preferences = ""  # Learning preferences
+    # st.session_state.learning_preferences = ""  # Learning preferences
     st.session_state.special_requirements = ""  # Special requirements
-    st.session_state.emergency_contact = ""  # Emergency contact information
+    # st.session_state.emergency_contact = ""  # Emergency contact information
     st.session_state.consent = False  # Consent for data processing
     st.session_state.signature = None  # Store signature
     
@@ -350,9 +350,9 @@ elif st.session_state.step == 5:
 
     # Text box for Preferred Language of Communication
     st.session_state.preferred_language = st.text_input(
-        "Preferred Language of Communication:",
+        "Preferred Language of Communication: (OPTIONAL)",
         value=st.session_state.preferred_language,  # Retain the previous input
-        placeholder="Enter your preferred language (e.g., English, Spanish)"
+        placeholder="Enter your preferred language (e.g., English, Urdu)"
     )
 
     # Next and Back buttons for navigation
@@ -361,7 +361,8 @@ elif st.session_state.step == 5:
 
     # Handle Next button click
     if next_clicked:
-        if st.session_state.country != "Select" and st.session_state.nationality != "Select" and st.session_state.preferred_language.strip():
+        # if st.session_state.country != "Select" and st.session_state.nationality != "Select" and st.session_state.preferred_language.strip():
+        if st.session_state.country != "Select" and st.session_state.nationality != "Select":
             st.session_state.step = 6
             st.experimental_rerun()
         else:
@@ -382,19 +383,65 @@ elif st.session_state.step == 6:
     # Initialize fields if they do not exist
     if 'email' not in st.session_state:
         st.session_state.email = ""  # Default to empty string
-    if 'phone' not in st.session_state:
-        st.session_state.phone = ""  # Default to empty string
+    # if 'phone' not in st.session_state:
+    #     st.session_state.phone = ""  # Default to empty string
     # if 'address' not in st.session_state:
     #     st.session_state.address = ""  # Default to empty string
-
+    if 'selected_country' not in st.session_state:
+        st.session_state.selected_country = "Select"
+    if 'dialing_code' not in st.session_state:
+        st.session_state.dialing_code = ""
+    if 'phone_number' not in st.session_state:
+        st.session_state.phone_number = ""
+        
     # Input fields for contact information
     st.session_state.email = st.text_input("Please enter your email address where we can reach you.", value=st.session_state.email)
 
     # Display the country dialing code before the phone number input
-    st.session_state.phone = st.text_input(
-        f"Please enter your WhatsApp number (international format starting with {selected_dialing_code} for {st.session_state.country}):", 
-        value=st.session_state.phone
-    )
+    # st.session_state.phone = st.text_input(
+    #     f"Please enter your WhatsApp number (international format starting with {selected_dialing_code} for {st.session_state.country}):", 
+    #     value=st.session_state.phone
+    # )
+    # st.session_state.phone = st.text_input(
+    #     f"Please Enter Your Contact number:", 
+    #     value=st.session_state.phone
+    # )
+
+# ###############
+    # Display country dropdown, dialing code, and phone number in a single row
+    
+    st.write("Please Enter Your Contact number:")
+    cols = st.columns([2, 0.4, 3])  # Adjust column widths as needed
+
+    with cols[0]:  # Country Dropdown
+        previous_country = st.session_state.get("selected_country", country_names[0])
+        st.session_state.selected_country = st.selectbox(
+            "Country:",
+            country_names,
+            index=country_names.index(previous_country) if previous_country in country_names else 0
+        )
+
+    # Update dialing code if the selected country changes
+    if st.session_state.selected_country != previous_country:
+        st.session_state.dialing_code = countries.get(st.session_state.selected_country, "")
+        
+    with cols[1]:  # Dialing Code
+        st.write("")  # Placeholder for alignment
+        st.write("")  # Placeholder for alignment
+        st.markdown(f"<p style='text-align:left; margin-top:2px;'><strong>{st.session_state.dialing_code}</strong></p>", unsafe_allow_html=True)
+
+    with cols[2]:  # Phone Number Input
+        st.session_state.phone_number = st.text_input(
+            "Phone Number:",
+            value=st.session_state.phone_number,
+            placeholder="Enter your contact number"
+        )
+
+    # Automatically remove leading zeros from the phone number
+    if st.session_state.phone_number.startswith("0"):
+        st.session_state.phone_number = st.session_state.phone_number.lstrip("0")
+    
+# ###############
 
     # Display the WhatsApp call availability message
     st.markdown(
@@ -439,9 +486,9 @@ elif st.session_state.step == 6:
     # Handle Next button click
     if next_clicked:
         # if st.session_state.phone and st.session_state.email and st.session_state.address:
-        if st.session_state.phone and st.session_state.email:
+        if st.session_state.phone_number and st.session_state.email:
             if is_valid_email(st.session_state.email):
-                is_valid, message = validate_phone_number(st.session_state.phone, selected_dialing_code)
+                is_valid, message = validate_phone_number(st.session_state.phone_number, selected_dialing_code)
                 if is_valid:
                     st.session_state.step = 7
                     st.experimental_rerun()
@@ -510,7 +557,7 @@ elif st.session_state.step == 7:
 
     # Text field for Accredited Qualifications
     st.session_state.accredited_qualifications = st.text_input(
-        "Accredited Qualifications (please specify the sector, if applicable):",
+        "Accredited Qualifications (please specify the sector, if applicable) (OPTIONAL):",
         value=st.session_state.accredited_qualifications
     )
 
@@ -634,8 +681,8 @@ elif st.session_state.step == 8:
                     index=reason_for_interest_options.index(st.session_state.get("reason_for_interest_ican", "Select"))
                 )
 
-            # Logic for "Functional Skills Commerce"
-            elif area == "Functional Skills Commerce":
+            # Logic for "Functional Skills Commerce (English & Math Training)"
+            elif area == "Functional Skills Commerce (English & Math Training)":
                 st.subheader(area)
 
                 # Input field for Current Role
@@ -702,6 +749,7 @@ elif st.session_state.step == 8:
                     # Reset vocational fields if experience is not selected
                     st.session_state.vocational_sector = "Select"
                     st.session_state.vocational_other = ""
+                    
 
             # Logic for "International Accredited Courses"
             elif area == "International Accredited Courses":
@@ -946,7 +994,7 @@ elif st.session_state.step == 8:
                         st.warning(f"[{subject_area}] Please select the course level and learning mode before proceeding.")
                         all_valid = False
 
-                elif subject_area == "Functional Skills Commerce":
+                elif subject_area == "Functional Skills Commerce (English & Math Training)":
                     if (
                         st.session_state.functional_current_role.strip() and
                         st.session_state.functional_reason_for_interest != "Select"
@@ -1099,12 +1147,12 @@ elif st.session_state.step == 11:
     st.title("> 10: Additional Information")
 
     # Initialize fields if they do not exist
-    if 'learning_preferences' not in st.session_state:
-        st.session_state.learning_preferences = ""  # Default to empty string
+    # if 'learning_preferences' not in st.session_state:
+    #     st.session_state.learning_preferences = ""  # Default to empty string
     if 'special_requirements' not in st.session_state:
         st.session_state.special_requirements = ""  # Default to empty string
-    if 'emergency_contact' not in st.session_state:
-        st.session_state.emergency_contact = ""  # Default to empty string
+    # if 'emergency_contact' not in st.session_state:
+    #     st.session_state.emergency_contact = ""  # Default to empty string
     if 'preferred_start_date' not in st.session_state:
         st.session_state.preferred_start_date = "Select"  # Default to Select
     if 'consent' not in st.session_state:
@@ -1138,18 +1186,18 @@ elif st.session_state.step == 11:
             "6 months +"
         ] else 0
     )    
-    st.session_state.learning_preferences = st.text_area(
-        "Please describe any learning preferences you have.", 
-        value=st.session_state.learning_preferences
-    )
+    # st.session_state.learning_preferences = st.text_area(
+    #     "Please describe any learning preferences you have.", 
+    #     value=st.session_state.learning_preferences
+    # )
     st.session_state.special_requirements = st.text_area(
-        "Please let us know if you have any special requirements.", 
+        "Please let us know if you have any special requirements. (if applicable, else put 'none')", 
         value=st.session_state.special_requirements
     )
-    st.session_state.emergency_contact = st.text_input(
-        "Please provide emergency contact details.", 
-        value=st.session_state.emergency_contact
-    )
+    # st.session_state.emergency_contact = st.text_input(
+    #     "Please provide emergency contact details.", 
+    #     value=st.session_state.emergency_contact
+    # )
 
     # Link to the privacy policy
     privacy_policy_doc_link = 'https://drive.google.com/file/d/1sgF6eHZ57idELDEkQD8ZQ7p8VPrmy3WC/view?ts=6789943b'
@@ -1180,7 +1228,7 @@ elif st.session_state.step == 11:
 
     # Handle Next button click
     if next_clicked:
-        if st.session_state.preferred_start_date != "Select" and all([st.session_state.learning_preferences, st.session_state.special_requirements, st.session_state.emergency_contact, st.session_state.consent]):
+        if st.session_state.preferred_start_date != "Select" and all([st.session_state.special_requirements, st.session_state.consent]):
             st.session_state.step = 12
             st.experimental_rerun()
         else:
@@ -1245,7 +1293,7 @@ elif st.session_state.step == 13:
     st.header("> Contact Information")
 
     st.write(f"**Email:** {st.session_state.email}")
-    st.write(f"**Phone:** {st.session_state.phone}")
+    st.write(f"**Phone:** {st.session_state.dialing_code}{st.session_state.phone_number}")
     # st.write(f"**Address:** {st.session_state.address}")
     
     st.header("> 6: Educational and Professional Background")
@@ -1286,7 +1334,7 @@ elif st.session_state.step == 13:
                 st.write(f"- **Course Level:** {details.get('course_level', 'Not Provided')}")
                 st.write(f"- **Learning Mode:** {details.get('learning_mode', 'Not Provided')}")
             
-            elif subject_area == "Functional Skills Commerce":
+            elif subject_area == "Functional Skills Commerce (English & Math Training)":
                 st.write(f"- **Current Role:** {details.get('current_role', 'Not Provided')}")
                 st.write(f"- **Reason for Interest:** {details.get('reason_for_interest', 'Not Provided')}")
             
@@ -1333,9 +1381,9 @@ elif st.session_state.step == 13:
     st.header("> 10: Additional Information")
 
     st.write(f"**Preferred Start Date/Timeline for Participation:** {st.session_state.preferred_start_date}")
-    st.write(f"**Learning Preferences:** {st.session_state.learning_preferences}")
+    # st.write(f"**Learning Preferences:** {st.session_state.learning_preferences}")
     st.write(f"**Special Requirements:** {st.session_state.special_requirements}")
-    st.write(f"**Emergency Contact:** {st.session_state.emergency_contact}")
+    # st.write(f"**Emergency Contact:** {st.session_state.emergency_contact}")
     # Display whether digital media consent is provided
     if st.session_state.digital_media_consent:
         st.write("**Digital Media Consent:** Yes, consent provided.")
@@ -1360,6 +1408,26 @@ elif st.session_state.step == 13:
             # Create a new Document
             # ======================================================================================================================
             doc = Document()
+            
+            # Add image
+            # Create a table with 1 row and 2 columns
+            table = doc.add_table(rows=1, cols=4)
+            table.allow_autofit = False
+
+            # Access the cells
+            left_cell = table.cell(0, 0)
+            right_cell = table.cell(0, 3)
+
+            # Add the image to the right cell
+            image_path = "resources/img_doc.png"
+            paragraph = right_cell.paragraphs[0]
+            run = paragraph.add_run()
+            run.add_picture(image_path, width=Inches(1.5))  # Adjust the width as needed
+
+            # Add the heading to the left cell
+            left_cell.text = " "  # Empty text to leave room for formatting
+            
+            # Main Heading
             doc.add_heading('Enrolment Form Submission', 0)
 
             # Add Personal Information
@@ -1374,7 +1442,7 @@ elif st.session_state.step == 13:
             # Add Contact Information
             doc.add_heading('Contact Information', level=1)
             doc.add_paragraph(f"Email: {st.session_state.email}")
-            doc.add_paragraph(f"Phone: {st.session_state.phone}")
+            doc.add_paragraph(f"Phone: {st.session_state.dialing_code}{st.session_state.phone_number}")
             # doc.add_paragraph(f"Address: {st.session_state.address}")
 
             # Add Educational and Professional Background
@@ -1403,7 +1471,7 @@ elif st.session_state.step == 13:
                     elif subject_area == "University Success (Admissions Support)":
                         doc.add_paragraph(f"Course Level: {details.get('course_level', 'Not Provided')}")
                         doc.add_paragraph(f"Learning Mode: {details.get('learning_mode', 'Not Provided')}")
-                    elif subject_area == "Functional Skills Commerce":
+                    elif subject_area == "Functional Skills Commerce (English & Math Training)":
                         doc.add_paragraph(f"Current Role: {details.get('current_role', 'Not Provided')}")
                         doc.add_paragraph(f"Reason for Interest: {details.get('reason_for_interest', 'Not Provided')}")
                     elif subject_area == "Teaching and Assessment Programme":
@@ -1437,9 +1505,9 @@ elif st.session_state.step == 13:
             # Add Additional Information
             doc.add_heading('Additional Information', level=1)
             doc.add_paragraph(f"Preferred Start Date/Timeline for Participation: {st.session_state.preferred_start_date}")
-            doc.add_paragraph(f"Learning Preferences: {st.session_state.learning_preferences}")
+            # doc.add_paragraph(f"Learning Preferences: {st.session_state.learning_preferences}")
             doc.add_paragraph(f"Special Requirements: {st.session_state.special_requirements}")
-            doc.add_paragraph(f"Emergency Contact: {st.session_state.emergency_contact}")
+            # doc.add_paragraph(f"Emergency Contact: {st.session_state.emergency_contact}")
             # Add Digital Media Consent to the document
             digital_media_consent_status = "Yes, consent provided." if st.session_state.digital_media_consent else "No, consent not provided."
             doc.add_paragraph(f"Digital Media Consent: {digital_media_consent_status}")
@@ -1553,6 +1621,10 @@ elif st.session_state.step == 14:
     st.write('')
     st.image('resources/AspireCraft.gif', use_column_width=True)
 
+    # if st.button("Back"):
+    #     st.session_state.step = 13  # Go back to step 13
+    #     st.experimental_rerun()    
+    
 # else:
 #     st.write("Form completed. Thank you!")
 
