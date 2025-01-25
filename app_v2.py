@@ -223,6 +223,17 @@ if st.session_state.step == 1:
         st.experimental_rerun()
 
 elif st.session_state.step == 2:
+    
+    # Add question with a dropdown menu
+    support_options = [
+    "    ", "Self", "M.I. Rushan", "Jaad Javed", "Shaad Javed", "Mohamed Sathath", "Aakifah Asger", "Navin Yogarasu", 
+    "Rochelle Ravishankar", "Dhilshan Abdul Rahman", "Pasindu Chamodya Nanayakkara", "Dinith Ferdinando"
+]
+    st.session_state.selected_option = st.selectbox(
+    "Who is supporting you to fill this form?", 
+    support_options
+)
+        
     st.title("> 1: Personal Information")
     
     # Ensure the personal_info variable is correctly set from the session state
@@ -237,11 +248,14 @@ elif st.session_state.step == 2:
 
     # Handle Next button click
     if next_clicked:
-        if st.session_state.personal_info:  # Check if the field is not empty
+        if st.session_state.personal_info and st.session_state.selected_option!='    ':  # Check if the field is not empty
             st.session_state.step = 3  # Move to the next step
             st.experimental_rerun()  # Refresh the app to reflect the new step
         else:
-            st.warning("Please enter your full name before proceeding.")
+            if st.session_state.selected_option=='    ':
+                st.warning("Please select SUPPORTING option before proceeding.")
+            else:
+                st.warning("Please enter your full name before proceeding.")
 
     # Handle Back button click
     if back_clicked:
@@ -1432,6 +1446,8 @@ elif st.session_state.step == 13:
     # ==================================================================================================================================
     st.write("Thank you for providing your details. Please review your information.")
 
+    st.write(f"**Selected Support Option:** {st.session_state.selected_option}")
+    
     st.header("> Personal Information Review")
    
     st.write(f"**Full Name:** {st.session_state.get('personal_info', 'Not Provided')}")
@@ -1612,6 +1628,8 @@ elif st.session_state.step == 13:
             
             # Main Heading
             doc.add_heading('Enrolment Form Submission', 0)
+
+            doc.add_paragraph(f"Selected Support Option: {st.session_state.selected_option}")
 
             # Add Personal Information
             doc.add_heading('Personal Information', level=1)
