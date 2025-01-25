@@ -185,7 +185,8 @@ if 'step' not in st.session_state:
     st.session_state.category = "Select"  # Default value
     st.session_state.courses = []  # Default to empty list
     st.session_state.learning_mode_cpd = "Online"  # Default value    
-    st.session_state.selected_course = {}  # To store selected details    
+    st.session_state.selected_course = {}  # To store selected details   
+    st.session_state.selected_option = "    "
 
 
 # Define a function to calculate progress and percentage
